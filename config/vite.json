@@ -13,7 +13,7 @@
     "publicOutputDir": "vite-test"
   },
   "production": {
-    "autoBuild": true,
+    "autoBuild": false,
     "publicOutputDir": "vite"
   }
 }
