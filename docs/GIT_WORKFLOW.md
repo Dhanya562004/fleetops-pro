@@ -6,7 +6,7 @@ Use one focused branch per reviewable change, for example `feature/vehicle-csv-r
 
 ## Merge Conflict Exercise Status
 
-A genuine merge conflict has **not** yet been created and resolved in this work session. This document does not claim otherwise. The local repository started with no commits on `main`, so the exercise must happen after the first branch commit and a base branch exist.
+Conflict exercise preparation: one branch records reviewer-facing guidance while another records the operational resolution. The outcome will be written after those edits collide in Git.
 
 When performed, record the actual branch names, conflicting file, competing intent, resolution, and commands here. Do not manufacture a conflict description or screenshot. A normal way to perform the exercise is to make two short-lived branches that edit the same documentation heading differently, commit each, merge one into the other, resolve the conflict deliberately, rerun checks, and retain the resolution commit.
 
