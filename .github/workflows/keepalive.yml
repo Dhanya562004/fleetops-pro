@@ -1,0 +1,17 @@
+name: Public demo health check
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping demo health endpoint
+        env:
+          DEMO_BASE_URL: ${{ vars.DEMO_BASE_URL }}
+        run: |
+          test -n "$DEMO_BASE_URL"
+          curl --fail --silent --show-error --max-time 30 "$DEMO_BASE_URL/up"

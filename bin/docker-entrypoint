@@ -1,0 +1,9 @@
+#!/bin/sh
+set -eu
+
+bundle exec rails db:prepare
+if [ "${SEED_ON_BOOT:-false}" = "true" ]; then
+  bundle exec rails db:seed
+fi
+
+exec bundle exec puma -C config/puma.rb

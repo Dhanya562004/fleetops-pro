@@ -1,0 +1,19 @@
+{
+  "all": {
+    "sourceCodeDir": "resources/js",
+    "watchAdditionalPaths": []
+  },
+  "development": {
+    "autoBuild": true,
+    "publicOutputDir": "vite-dev",
+    "port": 5173
+  },
+  "test": {
+    "autoBuild": true,
+    "publicOutputDir": "vite-test"
+  },
+  "production": {
+    "autoBuild": true,
+    "publicOutputDir": "vite"
+  }
+}

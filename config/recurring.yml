@@ -1,0 +1,10 @@
+production:
+  maintenance_due_reminders:
+    class: MaintenanceDueReminderJob
+    schedule: every day at 8am
+  low_stock_alerts:
+    class: LowStockAlertJob
+    schedule: every day at 8:15am
+  nightly_analytics_snapshot:
+    class: NightlyAnalyticsSnapshotJob
+    schedule: every day at 1am

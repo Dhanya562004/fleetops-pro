@@ -1,0 +1,18 @@
+<main class="mx-auto max-w-3xl px-5 py-8" data-controller="activity" data-activity-opened-at-value="<%= Time.current.iso8601 %>">
+  <header class="mb-6 flex items-start justify-between border-b border-stone-300 pb-5">
+    <div>
+      <p class="text-xs font-bold uppercase tracking-widest text-emerald-800">Legacy workshop activity / Ticket #<%= @ticket.id %></p>
+      <h1 class="mt-2 text-2xl font-bold"><%= @ticket.title %></h1>
+      <p class="mt-1 text-sm text-stone-600"><%= @ticket.vehicle.vin %> / <%= @ticket.vehicle.make %> <%= @ticket.vehicle.model %></p>
+    </div>
+    <%= link_to "Back to ticket", maintenance_ticket_path(@ticket), class: "text-sm font-semibold text-emerald-800" %>
+  </header>
+  <section class="border border-stone-200 bg-white">
+    <h2 class="border-b border-stone-200 px-4 py-3 text-sm font-bold">Workshop notes</h2>
+    <turbo-frame id="ticket-comments">
+      <%= render partial: "ticket_comments/comment", collection: @comments, as: :comment %>
+    </turbo-frame>
+    <%= render partial: "ticket_comments/form", locals: { ticket: @ticket, comment: TicketComment.new } %>
+  </section>
+  <p class="mt-3 text-xs text-stone-500">This screen uses the existing Turbo navigation and server-rendered form flow.</p>
+</main>
