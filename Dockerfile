@@ -23,6 +23,7 @@ ENV BUNDLE_PATH=/usr/local/bundle \
     BUNDLE_WITHOUT="development:test" \
     RAILS_ENV=production \
     RAILS_SERVE_STATIC_FILES=true \
+    RAILS_LOG_TO_STDOUT=true \
     SOLID_QUEUE_IN_PUMA=true
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates libpq5 && \
