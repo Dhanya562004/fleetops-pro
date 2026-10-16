@@ -14,7 +14,7 @@ class VehiclesControllerTest < ActionDispatch::IntegrationTest
     assert_match "text/csv", response.media_type
     rows = CSV.parse(response.body, headers: true)
     assert_includes rows.map { |row| row["VIN"] }, available.vin
-    assert_not_includes rows.map { |row| row["VIN"] }, unavailable.vin
+    refute_includes rows.map { |row| row["VIN"] }, unavailable.vin
     assert rows.all? { |row| row["Status"] == "ready" }
   end
 
