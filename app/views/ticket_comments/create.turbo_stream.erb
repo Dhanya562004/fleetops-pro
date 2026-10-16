@@ -1,0 +1,2 @@
+<%= turbo_stream.prepend "ticket-comments", partial: "ticket_comments/comment", locals: { comment: @comment } %>
+<%= turbo_stream.replace "new_ticket_comment", partial: "ticket_comments/form", locals: { ticket: @ticket, comment: TicketComment.new } %>
