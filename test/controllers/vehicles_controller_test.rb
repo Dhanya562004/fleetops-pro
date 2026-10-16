@@ -6,6 +6,7 @@ class VehiclesControllerTest < ActionDispatch::IntegrationTest
     create_vehicle(status: "ready")
     create_vehicle(status: "in_repair")
     post session_path, params: { email: user.email, password: "test-password" }
+    assert_redirected_to root_path
 
     get export_vehicles_path(format: :csv, status: "ready")
 
@@ -18,6 +19,7 @@ class VehiclesControllerTest < ActionDispatch::IntegrationTest
   test "technicians cannot create vehicle records" do
     technician = create_user(role: "technician")
     post session_path, params: { email: technician.email, password: "test-password" }
+    assert_redirected_to root_path
 
     post vehicles_path, params: { vehicle: { vin: "FOPIN000000000011", make: "Tata", model: "Nexon", year: 2024 } }
 
