@@ -1,5 +1,7 @@
 source "https://rubygems.org"
 
+ruby ">= 3.4.0", "< 3.5"
+
 gem "rails", "~> 8.0"
 gem "pg", "~> 1.5"
 gem "puma", ">= 6.0"
@@ -9,7 +11,7 @@ gem "redis", "~> 5.0"
 gem "bcrypt", "~> 3.1"
 gem "csv", "~> 3.3"
 gem "vite_rails", "~> 3.0"
-gem "tzinfo-data", platforms: %i[mingw mswin x64_mingw]
+gem "tzinfo-data"
 gem "turbo-rails", "~> 2.0"
 gem "stimulus-rails", "~> 1.3"
 

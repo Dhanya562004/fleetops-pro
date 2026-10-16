@@ -31,5 +31,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates
 WORKDIR /app
 COPY --from=build /usr/local/bundle /usr/local/bundle
 COPY --from=build /app /app
+EXPOSE 7860
 EXPOSE 3000
 CMD ["sh", "bin/docker-entrypoint"]

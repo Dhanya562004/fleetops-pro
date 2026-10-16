@@ -3,8 +3,8 @@ require "test_helper"
 class VehiclesControllerTest < ActionDispatch::IntegrationTest
   test "vehicle report exports filtered rows as CSV for a signed-in ops manager" do
     user = create_user
-    create_vehicle(status: "ready")
-    create_vehicle(status: "in_repair")
+    available = create_vehicle(status: "ready")
+    unavailable = create_vehicle(status: "in_repair")
     post session_path, params: { email: user.email, password: "test-password" }
     assert_redirected_to root_path
 
@@ -12,8 +12,10 @@ class VehiclesControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_match "text/csv", response.media_type
-    assert_includes response.body, "VIN,Make,Model,Year,Status,Lot,Mileage"
-    assert_equal 2, response.body.lines.length
+    rows = CSV.parse(response.body, headers: true)
+    assert_includes rows.map { |row| row["VIN"] }, available.vin
+    assert_not_includes rows.map { |row| row["VIN"] }, unavailable.vin
+    assert rows.all? { |row| row["Status"] == "ready" }
   end
 
   test "technicians cannot create vehicle records" do
@@ -21,9 +23,11 @@ class VehiclesControllerTest < ActionDispatch::IntegrationTest
     post session_path, params: { email: technician.email, password: "test-password" }
     assert_redirected_to root_path
 
-    post vehicles_path, params: { vehicle: { vin: "FOPIN000000000011", make: "Tata", model: "Nexon", year: 2024 } }
+    vin = "FOPIN#{SecureRandom.hex(6).upcase}"
+    assert_no_difference("Vehicle.count") do
+      post vehicles_path, params: { vehicle: { vin:, make: "Tata", model: "Nexon", year: 2024 } }
+    end
 
     assert_response :forbidden
-    assert_not Vehicle.exists?(vin: "FOPIN000000000011")
   end
 end
