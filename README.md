@@ -85,7 +85,7 @@ npm test -- --ci
 npm run build
 ```
 
-The React suite currently contains one component test. Backend tests cover models, workflow services, data-quality quarantine, notifications, CSV export, and role access. Backend test execution is pending a working local PostgreSQL service; no Minitest pass count is claimed here.
+The latest successful GitHub Actions run on PR #1 completed 15 Minitest runs with 59 assertions and 1 Jest/RTL test. It also passed RuboCop, TypeScript type-check, ESLint, and the production Vite build. The local machine still has no working PostgreSQL service, so the backend suite was verified in CI rather than locally.
 
 ## Operational Problems Mapped to Code
 
@@ -114,4 +114,4 @@ The React suite currently contains one component test. Backend tests cover model
 
 ## CI and Deployment Status
 
-GitHub Actions is configured for pull requests and pushes to `main`, with PostgreSQL and Redis service containers. A scheduled `/up` ping workflow uses the repository variable `DEMO_BASE_URL`. CI status and live URLs will be added only after the repository is pushed and the workflow/deployment has actually run.
+GitHub Actions is configured for pull requests and pushes to `main`, with PostgreSQL and Redis service containers. PR [#1](https://github.com/Dhanya562004/fleetops-pro/pull/1) is open; its latest CI run passed. A scheduled `/up` ping workflow uses the repository variable `DEMO_BASE_URL`. No live app URL is claimed because no host/database/Redis account has been provisioned.

@@ -6,7 +6,7 @@ I built FleetOps Pro as a fictional fleet operations tool focused on the handoff
 
 The most important rules live on the server. A lot transfer locks the vehicle and both affected lots before it checks capacity and records a move. Repair transitions go through a service object that validates the allowed next state and writes an audit event. A shortage blocks repair work and is visible on the dashboard rather than being buried in inventory data. For reporting, a query object uses PostgreSQL CTEs and a window function; Rails.cache stores the result briefly, and model/service writes invalidate it.
 
-The project has focused Minitest and Jest tests, Docker and CI configuration, and a seeded fictional fleet. I have not yet run the database suite or measured query counts because this workspace has no usable PostgreSQL service and Docker is unavailable. I would be precise about those gaps rather than presenting unverified numbers as results.
+The project has focused Minitest and Jest tests, Docker and CI configuration, and a seeded fictional fleet. GitHub Actions passed 15 Minitest runs with 59 assertions and one Jest/RTL test on PR #1. I could not run the database suite locally because this workspace has no usable PostgreSQL service and Docker is unavailable, and I have not measured query counts or elapsed times. I would be precise about those gaps rather than presenting unverified numbers as results.
 
 ## Three Hard Problems
 
