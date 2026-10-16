@@ -25,4 +25,8 @@ class MaintenanceTicket < ApplicationRecord
       remaining.positive? && request.part.stock_quantity < remaining
     end
   end
+
+  def parts_fulfilled?
+    ticket_parts.all? { |request| request.quantity_fulfilled >= request.quantity_requested }
+  end
 end

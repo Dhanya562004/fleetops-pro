@@ -28,7 +28,18 @@ class Maintenance::TransitionTest < ActiveSupport::TestCase
   test "prevents quality check while a requested part is unfulfilled" do
     ticket = create_ticket(status: "repair")
     supplier = Supplier.create!(name: "Test supplier #{SecureRandom.hex(3)}")
-    part = Part.create!(sku: "TEST-#{SecureRandom.hex(3)}", name: "Brake pads", supplier:, stock_quantity: 1, reorder_threshold: 1)
+    part = Part.create!(sku: "TEST-#{SecureRandom.hex(3)}", name: "Brake pads", supplier:, stock_quantity: 0, reorder_threshold: 1)
+    ticket.ticket_parts.create!(part:, quantity_requested: 1)
+
+    assert_raises(Maintenance::Transition::InvalidTransition) do
+      Maintenance::Transition.call(ticket:, to: "quality_check")
+    end
+  end
+
+  test "does not allow quality check before stocked parts are fulfilled" do
+    ticket = create_ticket(status: "repair")
+    supplier = Supplier.create!(name: "Test supplier #{SecureRandom.hex(3)}")
+    part = Part.create!(sku: "TEST-#{SecureRandom.hex(3)}", name: "Brake pads", supplier:, stock_quantity: 4, reorder_threshold: 1)
     ticket.ticket_parts.create!(part:, quantity_requested: 1)
 
     assert_raises(Maintenance::Transition::InvalidTransition) do

@@ -34,7 +34,7 @@ module Maintenance
         from = ticket.status
         allowed = TRANSITIONS.fetch(from, [])
         raise InvalidTransition, "Cannot move ticket from #{from} to #{@to}" unless allowed.include?(@to)
-        raise InvalidTransition, "Resolve requested parts before quality check" if @to == "quality_check" && ticket.parts_shortage?
+        raise InvalidTransition, "Fulfill requested parts before quality check" if @to == "quality_check" && !ticket.parts_fulfilled?
 
         ticket.update!(
           status: @to,
