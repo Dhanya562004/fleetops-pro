@@ -13,5 +13,6 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success, diagnostic.first(2_000)
     assert_includes response.body, "Auth/Login"
     assert_includes response.body, "/vite-test/"
+    assert_includes response.body, "id=\"app\""
   end
 end
