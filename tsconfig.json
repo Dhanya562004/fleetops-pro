@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["resources/js/*"]
+    }
+  },
+  "files": [
+    "resources/js/env.d.ts",
+    "resources/js/types.ts",
+    "resources/js/components/AppShell.tsx",
+    "resources/js/components/StatusBadge.tsx",
+    "resources/js/components/TicketParts.tsx",
+    "resources/js/entrypoints/application.tsx",
+    "resources/js/entrypoints/hotwire.ts",
+    "resources/js/pages/Auth/Login.tsx",
+    "resources/js/pages/Analytics/Show.tsx",
+    "resources/js/pages/Dashboard/Show.tsx",
+    "resources/js/pages/Lots/Index.tsx",
+    "resources/js/pages/Parts/Shortages.tsx",
+    "resources/js/pages/Technicians/Index.tsx",
+    "resources/js/pages/Tickets/Index.tsx",
+    "resources/js/pages/Tickets/Show.tsx",
+    "resources/js/pages/Vehicles/Form.tsx",
+    "resources/js/pages/Vehicles/Index.tsx",
+    "resources/js/pages/Vehicles/Show.tsx",
+    "resources/js/stimulus/application.ts",
+    "resources/js/stimulus/controllers/activity_controller.ts",
+    "test/javascript/setup.ts",
+    "test/javascript/status_badge.test.tsx"
+  ]
+}
