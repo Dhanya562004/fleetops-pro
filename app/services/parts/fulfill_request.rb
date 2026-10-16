@@ -13,7 +13,7 @@ module Parts
         part.update!(stock_quantity: part.stock_quantity - quantity.to_i)
         request.update!(quantity_fulfilled: request.quantity_fulfilled + quantity.to_i)
 
-        if request.maintenance_ticket.status == "awaiting_parts" && !request.maintenance_ticket.parts_shortage?
+        if request.maintenance_ticket.status == "awaiting_parts" && request.maintenance_ticket.parts_fulfilled?
           Maintenance::Transition.call(ticket: request.maintenance_ticket, to: "repair", actor:, note: "Requested parts fulfilled")
         end
         Rails.cache.delete("fleet_metrics:v1")

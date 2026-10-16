@@ -19,4 +19,17 @@ class Parts::RequestForTicketTest < ActiveSupport::TestCase
     assert_equal "in_repair", vehicle.reload.status
     assert_not ticket.parts_shortage?
   end
+
+  test "partial fulfillment keeps a ticket awaiting parts" do
+    vehicle = create_vehicle(status: "awaiting_parts")
+    ticket = create_ticket(vehicle:, status: "awaiting_parts")
+    supplier = Supplier.create!(name: "Test supplier #{SecureRandom.hex(3)}")
+    part = Part.create!(sku: "TEST-#{SecureRandom.hex(3)}", name: "Wheel bearing", supplier:, stock_quantity: 2, reorder_threshold: 1)
+    request = ticket.ticket_parts.create!(part:, quantity_requested: 2)
+
+    Parts::FulfillRequest.call(ticket_part: request, quantity: 1)
+
+    assert_equal "awaiting_parts", ticket.reload.status
+    assert_equal 1, request.reload.quantity_fulfilled
+  end
 end
