@@ -15,7 +15,7 @@ RUN bundle install
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-RUN SECRET_KEY_BASE=build-only-not-a-production-secret npm run build
+RUN npm run build
 
 FROM ruby:3.4-slim AS runtime
 
