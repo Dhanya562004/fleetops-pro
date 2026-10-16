@@ -1,0 +1,13 @@
+.git
+.github
+.env
+.env.*
+node_modules
+coverage
+log/*
+tmp/*
+storage/*
+public/vite
+public/vite-test
+config/master.key
+config/credentials/*.key

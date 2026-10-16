@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fleetops
+      POSTGRES_PASSWORD: fleetops
+      POSTGRES_DB: fleetops_pro_development
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fleetops -d fleetops_pro_development"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  web:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://fleetops:fleetops@db:5432/fleetops_pro_development
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY_BASE: local-development-secret-change-before-production
+      PORT: 3000
+      SEED_ON_BOOT: "true"
+      SOLID_QUEUE_IN_PUMA: "true"
+    ports:
+      - "3000:3000"
+
+volumes:
+  postgres_data:
