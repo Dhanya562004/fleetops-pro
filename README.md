@@ -9,6 +9,8 @@
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Render](https://img.shields.io/badge/Render-Deployed-46E3B7?style=flat&logo=render&logoColor=black)](https://render.com/)
+[![Coverage](https://img.shields.io/badge/Coverage-63.7%25-brightgreen?style=flat&logo=ruby)](README.md#-testing--quality-assurance)
+[![Tests](https://img.shields.io/badge/Tests-33%20passed-success?style=flat)](README.md#-testing--quality-assurance)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **FleetOps Pro** is an enterprise-grade fleet operations, maintenance workflow, and yard capacity management platform. It solves a fundamental logistics problem: **What is keeping a vehicle from returning to active service?**
@@ -38,6 +40,7 @@
 - [Production Deployment](#-production-deployment)
 - [Testing & Quality Assurance](#-testing--quality-assurance)
 - [How Concurrency is Handled](#-how-concurrency-is-handled)
+- [AI Usage & Governance](AI_USAGE.md)
 - [Author & Acknowledgments](#-author)
 
 ---
