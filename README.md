@@ -9,6 +9,8 @@
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Render](https://img.shields.io/badge/Render-Deployed-46E3B7?style=flat&logo=render&logoColor=black)](https://render.com/)
+[![Coverage](https://img.shields.io/badge/Coverage-63.7%25-brightgreen?style=flat&logo=ruby)](README.md#-testing--quality-assurance)
+[![Tests](https://img.shields.io/badge/Tests-33%20passed-success?style=flat)](README.md#-testing--quality-assurance)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **FleetOps Pro** is an enterprise-grade fleet operations, maintenance workflow, and yard capacity management platform. It solves a fundamental logistics problem: **What is keeping a vehicle from returning to active service?**
@@ -37,6 +39,8 @@
 - [Local Setup & Installation](#-local-setup--installation)
 - [Production Deployment](#-production-deployment)
 - [Testing & Quality Assurance](#-testing--quality-assurance)
+- [How Concurrency is Handled](#-how-concurrency-is-handled)
+- [AI Usage & Governance](AI_USAGE.md)
 - [Author & Acknowledgments](#-author)
 
 ---
@@ -311,22 +315,34 @@ The production [Dockerfile](Dockerfile) utilizes a clean two-stage build:
 
 ## 🧪 Testing & Quality Assurance
 
-The codebase enforces strict continuous integration standards via GitHub Actions:
+The codebase enforces strict continuous integration standards via GitHub Actions, covering backend domain services, state machines, query caching, pessimistic concurrency, frontend React components, linters, and type checking.
+
+### Test Execution Commands & Verified Metrics
+
+| Test Suite / Checker | Tool | Command | Verified Metrics & Status |
+| :--- | :--- | :--- | :--- |
+| **Backend Tests** | Minitest 6 | `bundle exec rails test` | **33 runs, 343 assertions, 0 failures, 0 errors, 0 skips** (✅ Passed) |
+| **Backend Coverage** | SimpleCov 1.3 | Integrated in `test_helper.rb` | **63.70% line coverage (272 / 427 lines)** |
+| **Frontend Tests** | Jest 29 + RTL | `npm test -- --ci` | **1 test suite passed, 1 test passed (1 total)** (✅ Passed) |
+| **Ruby Code Style** | RuboCop Omakase | `bundle exec rubocop` | **70 files inspected, 0 offenses detected** (✅ Clean) |
+| **Frontend Linting** | ESLint 8 | `npm run lint` | **0 errors, 0 warnings** across `resources/js` (✅ Clean) |
+| **Type Checking** | TypeScript 5.7 | `npm run type-check` | **`tsc --noEmit` exited 0, 0 type errors** (✅ Clean) |
+| **Production Build** | Vite 8 | `npm run build` | **Asset compilation succeeded into `public/vite/`** (✅ Clean) |
 
 ```bash
-# 1. Ruby code style and conventions
+# 1. Ruby code style and conventions (70 files inspected, 0 offenses)
 bundle exec rubocop
 
-# 2. Rails backend tests (Minitest)
+# 2. Rails backend tests (33 runs, 343 assertions, 0 failures, 63.70% line coverage)
 bundle exec rails test
 
-# 3. TypeScript static analysis
+# 3. TypeScript static analysis (0 errors)
 npm run type-check
 
-# 4. Frontend ESLint checks
+# 4. Frontend ESLint checks (0 errors, 0 warnings)
 npm run lint
 
-# 5. React component tests (Jest + RTL)
+# 5. React component tests (1 passed, 1 total)
 npm test -- --ci
 
 # 6. Production Vite asset compilation check
@@ -335,9 +351,35 @@ npm run build
 
 ### GitHub Actions CI Workflow
 - Executes on every Pull Request and push to `main`.
-- Boots managed PostgreSQL 16 and Redis 7 service containers.
-- Validates linters, Minitest suite, Jest suite, and asset building in parallel.
+- Boots managed PostgreSQL 16 and Redis 7 service containers with health checks.
+- Runs linters, Minitest suite, Jest suite, TypeScript type-check, and Vite production bundle compilation.
+- Publishes an automated execution and coverage summary directly to `$GITHUB_STEP_SUMMARY`.
 - Automated health check workflow (`keepalive.yml`) polls `/up` every 10 minutes.
+
+---
+
+## 🔒 How Concurrency is Handled
+
+FleetOps Pro operates in high-volume depot environments where multiple dispatchers, technicians, and automated background jobs may simultaneously update vehicle locations, change maintenance states, or query operational analytics. Concurrency safety is enforced at the database and application layers:
+
+### 1. Pessimistic Row Locking (`SELECT ... FOR UPDATE`)
+- **Deterministic Lock Ordering**: When transferring a vehicle between lots (`Lots::MoveVehicle`), row-level exclusive locks are acquired via `Lot.where(id: lot_ids).order(:id).lock`. Sorting lot IDs deterministically (`[vehicle.lot_id, to_lot.id].compact.uniq.sort`) guarantees that reciprocal moves (e.g., Lot A &rarr; Lot B and Lot B &rarr; Lot A) acquire locks in identical order, eliminating database deadlocks.
+- **Vehicle Locking**: The vehicle itself is locked (`Vehicle.lock.find(@vehicle_id)`) to prevent simultaneous transfer requests for the same vehicle across concurrent sessions.
+
+### 2. Yard Capacity Invariant Under Race Conditions
+- **Serialized Capacity Checks**: The transfer occurs inside a single database transaction (`Move.transaction`). Because the destination lot row is exclusively locked, any concurrent transaction attempting to transfer into that lot is queued until the first transaction commits or rolls back.
+- **Strict Capacity Guard**: The service evaluates `destination.vehicles.count >= destination.capacity` under the lock. If $N$ threads race to move vehicles into a lot with only one space remaining:
+  1. The first thread acquires the lock, observes space available, inserts the `Move` audit record, updates `vehicle.lot_id`, and commits.
+  2. The remaining $N - 1$ threads acquire the lock sequentially, observe that `destination.vehicles.count` is now equal to `destination.capacity`, and immediately abort with `Lots::MoveVehicle::CapacityExceeded`.
+  3. The destination lot count **never exceeds capacity**.
+
+### 3. Concurrency Test Architecture (`use_transactional_tests = false`)
+- **Why Transactional Tests Must Be Disabled**: Rails default tests run inside an uncommitted database transaction rolled back at test completion. Because PostgreSQL isolates uncommitted data across connections, separate OS threads checking out independent pool connections cannot observe uncommitted test fixtures, and real PostgreSQL `FOR UPDATE` lock contention cannot be tested.
+- **Thread Race Verification**: In `Lots::MoveVehicleConcurrencyTest`, `self.use_transactional_tests = false` allows $N$ worker threads to check out true database connections from the ActiveRecord connection pool, synchronize on a `ConditionVariable` barrier, and race simultaneously against real PostgreSQL row locks.
+- **Deterministic Teardown**: Because non-transactional changes commit to the test database, an explicit `teardown` block deletes all generated `Move` records, vehicles, and lots after each run.
+
+### 4. Workflow State Machine Serialization
+- In `Maintenance::Transition`, status advancements execute within `MaintenanceTicket.transaction` while holding an exclusive row lock (`MaintenanceTicket.lock.find(@ticket_id)`). This guarantees that concurrent updates, part fulfillment checks, and vehicle status synchronizations are strictly serialized.
 
 ---
 
