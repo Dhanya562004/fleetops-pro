@@ -9,8 +9,8 @@
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat&logo=redis&logoColor=white)](https://redis.io/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Render](https://img.shields.io/badge/Render-Deployed-46E3B7?style=flat&logo=render&logoColor=black)](https://render.com/)
-[![Coverage](https://img.shields.io/badge/Coverage-63.7%25-brightgreen?style=flat&logo=ruby)](README.md#-testing--quality-assurance)
-[![Tests](https://img.shields.io/badge/Tests-33%20passed-success?style=flat)](README.md#-testing--quality-assurance)
+[![Coverage](https://img.shields.io/badge/Coverage-64.9%25-brightgreen?style=flat&logo=ruby)](README.md#-testing--quality-assurance)
+[![Tests](https://img.shields.io/badge/Tests-38%20passed-success?style=flat)](README.md#-testing--quality-assurance)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 > **FleetOps Pro** is an enterprise-grade fleet operations, maintenance workflow, and yard capacity management platform. It solves a fundamental logistics problem: **What is keeping a vehicle from returning to active service?**
@@ -322,19 +322,19 @@ The codebase enforces strict continuous integration standards via GitHub Actions
 
 | Test Suite / Checker | Tool | Command | Verified Metrics & Status |
 | :--- | :--- | :--- | :--- |
-| **Backend Tests** | Minitest 6 | `bundle exec rails test` | **33 runs, 343 assertions, 0 failures, 0 errors, 0 skips** (✅ Passed) |
-| **Backend Coverage** | SimpleCov 1.3 | Integrated in `test_helper.rb` | **63.70% line coverage (272 / 427 lines)** |
+| **Backend Tests** | Minitest 6 | `bundle exec rails test` | **38 runs, 374 assertions, 0 failures, 0 errors, 0 skips** (✅ Passed) |
+| **Backend Coverage** | SimpleCov 1.3 | Integrated in `test_helper.rb` | **64.90% line coverage (294 / 453 lines)** |
 | **Frontend Tests** | Jest 29 + RTL | `npm test -- --ci` | **1 test suite passed, 1 test passed (1 total)** (✅ Passed) |
-| **Ruby Code Style** | RuboCop Omakase | `bundle exec rubocop` | **70 files inspected, 0 offenses detected** (✅ Clean) |
+| **Ruby Code Style** | RuboCop Omakase | `bundle exec rubocop` | **77 files inspected, 0 offenses detected** (✅ Clean) |
 | **Frontend Linting** | ESLint 8 | `npm run lint` | **0 errors, 0 warnings** across `resources/js` (✅ Clean) |
 | **Type Checking** | TypeScript 5.7 | `npm run type-check` | **`tsc --noEmit` exited 0, 0 type errors** (✅ Clean) |
 | **Production Build** | Vite 8 | `npm run build` | **Asset compilation succeeded into `public/vite/`** (✅ Clean) |
 
 ```bash
-# 1. Ruby code style and conventions (70 files inspected, 0 offenses)
+# 1. Ruby code style and conventions (77 files inspected, 0 offenses)
 bundle exec rubocop
 
-# 2. Rails backend tests (33 runs, 343 assertions, 0 failures, 63.70% line coverage)
+# 2. Rails backend tests (38 runs, 374 assertions, 0 failures, 64.90% line coverage)
 bundle exec rails test
 
 # 3. TypeScript static analysis (0 errors)
