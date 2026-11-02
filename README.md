@@ -40,6 +40,7 @@
 - [Production Deployment](#-production-deployment)
 - [Testing & Quality Assurance](#-testing--quality-assurance)
 - [How Concurrency is Handled](#-how-concurrency-is-handled)
+- [Background Jobs](#⚙️-background-jobs)
 - [AI Usage & Governance](AI_USAGE.md)
 - [Author & Acknowledgments](#-author)
 
@@ -120,7 +121,7 @@ Comprehensive fleet directory supporting multi-criteria search, status filtering
 | **Styling & Design** | **Tailwind CSS 3.4** | Enterprise design system with responsive layouts and custom status palettes |
 | **Primary Database** | **PostgreSQL 16 (Neon)** | ACID transactions, foreign keys, check constraints, composite indexes, and CTEs |
 | **Caching Layer** | **Redis 7 (Upstash)** | High-throughput distributed key-value cache with TLS connection (`rediss://`) |
-| **Background Jobs** | **Solid Queue 1.0** | PostgreSQL-backed job processing supervised inside Puma |
+| **Background Jobs** | **Solid Queue 1.0 & Sidekiq 8.1** | PostgreSQL-backed job processing supervised inside Puma (Solid Queue) and Redis-backed reports queue (Sidekiq) |
 | **Containerization** | **Docker (Multi-stage)** | Lightweight production container (`ruby:3.4-slim`) with static asset precompilation |
 | **Deployment / Host** | **Render Web Service** | Automated continuous deployment with health checks on `/up` |
 
@@ -380,6 +381,56 @@ FleetOps Pro operates in high-volume depot environments where multiple dispatche
 
 ### 4. Workflow State Machine Serialization
 - In `Maintenance::Transition`, status advancements execute within `MaintenanceTicket.transaction` while holding an exclusive row lock (`MaintenanceTicket.lock.find(@ticket_id)`). This guarantees that concurrent updates, part fulfillment checks, and vehicle status synchronizations are strictly serialized.
+
+
+---
+
+## ⚙️ Background Jobs
+
+FleetOps Pro utilizes a dual-engine architecture for background job execution, separating transactional operational workflows from heavy analytical report caching:
+
+### 1. Engine Allocation & Responsibilities
+
+| Engine | Backing Store | Jobs Handled | Architecture & Role |
+| :--- | :--- | :--- | :--- |
+| **Solid Queue** *(existing)* | PostgreSQL 16 | `LowStockAlertJob`<br/>`MaintenanceDueReminderJob`<br/>`NightlyAnalyticsSnapshotJob`<br/>`NotificationProcessingJob` | Managed within Puma via `plugin :solid_queue` when `SOLID_QUEUE_IN_PUMA=true`. Handles all scheduled cron triggers in `config/recurring.yml` and ActiveJob workflows. |
+| **Sidekiq** *(new)* | Redis 7 | `RefreshShortageReportJob` | Dedicated high-throughput worker process (`Sidekiq::Job`) reading and writing cached report aggregates with TTL to Redis. |
+
+### 2. Sidekiq Job Specifications
+
+- **Job Class**: `RefreshShortageReportJob`
+- **Queue**: `reports` (configured via `config/sidekiq.yml` with concurrency: 5)
+- **Cache Key**: `fleetops:shortage_report`
+- **Cache Expiry**: 5 minutes (`300` seconds TTL)
+- **Service Object**: `Parts::ShortageDelayReport` (`app/services/parts/shortage_delay_report.rb`)
+- **Idempotency**: Running `RefreshShortageReportJob` multiple times against identical database records produces the exact same cached JSON payload without side effects.
+- **Trigger**: Enqueued via Rake task `bundle exec rake reports:refresh_shortage` (documented manual trigger) or programmatically via `RefreshShortageReportJob.perform_async`.
+
+### 3. Local Execution
+
+To run the Sidekiq worker process locally:
+
+```bash
+# Start Sidekiq with the dedicated reports queue configuration
+bundle exec sidekiq
+
+# In another terminal, enqueue the report refresh job
+bundle exec rake reports:refresh_shortage
+```
+
+### 4. Production vs Local & CI Status
+
+> [!NOTE]
+> **Deployment Status**: The production deployment configuration (`Dockerfile` and `docs/DEPLOYMENT.md`) runs Puma with `SOLID_QUEUE_IN_PUMA=true` on a single web service dyno/container. No standalone Sidekiq worker container is provisioned in the current production deployment. Therefore, the Sidekiq-backed job is verified for **local and CI only**.
+
+### 5. Measured Test & Quality Results
+
+Measurements recorded from actual test runs:
+
+- **Minitest Suite**: `38 runs, 374 assertions, 0 failures, 0 errors, 0 skips` (up from 33 runs, 343 assertions baseline)
+- **SimpleCov Line Coverage**: **64.90%** (294 / 453 lines covered, exceeding the 63.70% baseline)
+- **RuboCop Omakase**: **0 offenses** across 77 files inspected
+
 
 ---
 
